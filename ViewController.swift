@@ -8,20 +8,15 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController
+{
     
-    // Main Class.
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
-        // Change background color to black.
-        self.view.backgroundColor = .black
-
-        NewGame()
-    }
     // Global Variables.
-    var cards = [UIButton]()
+    // Free init as long as the member variables of the class are initialized.
+    // Lazy initializes when called.
+//    lazy var game = Concentration(numberOfPairsOfCards: (cardButtons.count + 1) / 2)
+    
+    var cardButtons = [UIButton]()
     var cardStackView = UIStackView()
     
     var flipCountLabel = UILabel(frame: CGRect(x: 50, y: 50, width: 50, height: 50))
@@ -33,6 +28,19 @@ class ViewController: UIViewController {
         {
             flipCountLabel.text = "Flips: \(flipCount)"
         }
+    }
+    
+    
+    // Main Class.
+    override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+        
+        // Change background color to black.
+        self.view.backgroundColor = .black
+
+        NewGame()
     }
     
     
@@ -75,7 +83,7 @@ class ViewController: UIViewController {
         {
             createCard(emoji: e)
             print(e)
-            print(cards.count)
+            print(cardButtons.count)
         }
         
         // Align the cards evenly.
@@ -105,13 +113,11 @@ class ViewController: UIViewController {
     
     fileprivate func createCard(emoji: String)
     {
-        let card = UIButton(frame: CGRect(x: 100, y: 100, width: 100, height: 150))
-        
-        card.backgroundColor = UIColor.orange
-        card.setTitle(emoji, for: UIControl.State.normal)
+        let card = Card(emoji: emoji)
+
         card.addTarget(self, action: #selector(FlipCard), for: .touchUpInside)
-        
-        cards.append(card)
+
+        cardButtons.append(card)
         cardStackView.addArrangedSubview(card)
 
     }
@@ -122,18 +128,57 @@ class ViewController: UIViewController {
         flipCount += 1
         let card: UIButton = sender
         
-        if card.backgroundColor == UIColor.white
+//        if card.backgroundColor == UIColor.white
+//        {
+//            card.backgroundColor = UIColor.orange
+//            print("Changing to black.")
+//        }
+//        else
+//        {
+//            card.backgroundColor = UIColor.white
+//            print("Changing to white.")
+//        }
+        
+        // TODO: Fix.
+        if let cardNumber = cardButtons.firstIndex(of: card)
         {
-            card.backgroundColor = UIColor.orange
-            print("Changing to black.")
+            game.chooseCard(at: cardNumber)
+            UpdateViewFromModel()
         }
         else
         {
-            card.backgroundColor = UIColor.white
-            print("Changing to white.")
+            print("Chosen card was not in cardButtons.")
         }
     }
+    
+    // TODO: Fix.
+    func UpdateViewFromModel()
+    {
+        for index in cardButtons.indices
+        {
+            let button = cardButtons[index]
+            let card = game.cards[index]
+            
+            if card.isFaceUp
+            {
+                button.setTitle(emoji(for: card), for: UIControl.State.normal)
+                button.backgroundColor = UIColor.orange
+                print("Changing to black.")
+            }
+            else
+            {
+                button.setTitle(emoji(for: card), for: UIControl.State.normal)
+                button.backgroundColor = card.isMatched ? UIColor.clear : UIColor.orange
+            }
+        }
+    }
+    
+    let emojis = ["☠️", "👽", "☠️", "👽"]
 
+    func emoji(for card: Card) -> String
+    {
+        return "?"
+    }
     
 }
 
